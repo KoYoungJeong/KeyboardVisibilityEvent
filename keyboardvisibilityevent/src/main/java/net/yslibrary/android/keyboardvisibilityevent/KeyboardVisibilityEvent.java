@@ -2,11 +2,14 @@ package net.yslibrary.android.keyboardvisibilityevent;
 
 import android.app.Activity;
 import android.graphics.Rect;
+import android.os.Build;
+import android.view.DisplayCutout;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewTreeObserver;
 
 import android.view.WindowManager;
+
 import net.yslibrary.android.keyboardvisibilityevent.util.UIUtil;
 
 /**
@@ -52,8 +55,8 @@ public class KeyboardVisibilityEvent {
         }
 
         int softInputMethod = activity.getWindow().getAttributes().softInputMode;
-        if(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE != softInputMethod &&
-            WindowManager.LayoutParams.SOFT_INPUT_ADJUST_UNSPECIFIED != softInputMethod){
+        if (WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE != softInputMethod &&
+                WindowManager.LayoutParams.SOFT_INPUT_ADJUST_UNSPECIFIED != softInputMethod) {
             throw new IllegalArgumentException("Parameter:activity window SoftInputMethod is not ADJUST_RESIZE");
         }
 
@@ -76,6 +79,12 @@ public class KeyboardVisibilityEvent {
 
                         int screenHeight = activityRoot.getRootView().getHeight();
                         int heightDiff = screenHeight - r.height();
+                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+                            DisplayCutout displayCutout = activity.getWindow().getDecorView().getRootWindowInsets().getDisplayCutout();
+                            if (displayCutout != null) {
+                                heightDiff = heightDiff - displayCutout.getSafeInsetTop() - displayCutout.getSafeInsetBottom();
+                            }
+                        }
 
                         boolean isOpen = heightDiff > screenHeight * KEYBOARD_MIN_HEIGHT_RATIO;
 
